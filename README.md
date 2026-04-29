@@ -9,3 +9,5 @@ This is NOT an LLM or "ChatGPT", so it doesn't generate the responses out of now
 Feel free to use it in any NON COMMERCIAL projects, and suggestions are always welcome 🤗
 
 All customization will happen in `system_settings.py` **VERY IMPORTANT** to change the list of pre-defined responses to suit your needs. put as many as you would like!
+
+I plan to continue updating this, so the current version will probably not be the last!
