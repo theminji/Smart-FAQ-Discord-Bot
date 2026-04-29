@@ -1,0 +1,3 @@
+"git+https://github.com/dantetemplar/fork-FlagEmbedding.git@refs/heads/fix/reranker-transformers-v5-tokenizer-compat" # https://github.com/FlagOpen/FlagEmbedding/issues/1569
+discord.py
+python-dotenv
