@@ -10,4 +10,6 @@ Feel free to use it in any NON COMMERCIAL projects, and suggestions are always w
 
 All customization will happen in `system_settings.py` **VERY IMPORTANT** to change the list of pre-defined responses to suit your needs. put as many as you would like!
 
+**Best practice** for writing responses: restate the question in the answer ("Go to #tickets" -> "To make a support ticket, go to #tickets")
+
 I plan to continue updating this, so the current version will probably not be the last!
