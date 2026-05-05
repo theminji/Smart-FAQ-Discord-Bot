@@ -50,7 +50,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    if message.author == client.user: # skip the messages from this bot
         return
     # async handle message so that the bot doesnt get backlogged
     asyncio.create_task(handle_message(message))
@@ -58,16 +58,16 @@ async def on_message(message):
 # this command/function is optional, it just allows for smoohter moderation with users without revealing who sent it
 @tree.command(name="adminmessage", description="Send an anonymous message in the current channel (admins only)")
 async def admin_message(interaction: discord.Interaction, message: str):
-    if interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message("Sending anon message", ephemeral=True)
+    if interaction.user.guild_permissions.kick_members: # make sure the user is a mod/admin before running the command
+        await interaction.response.send_message("Sending anonymous message", ephemeral=True)
         channel = interaction.channel
         embed = discord.Embed(
-            color=discord.Color.gold(),
+            color=discord.Color.gold(), # you can replace this with any color you want, I just like the gold color https://discordpy.readthedocs.io/en/latest/api.html?highlight=color#discord.Colour.gold
             title="Message from admins",
             description=message
         )
         await channel.send(embed=embed)
     else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True)
+        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
 
 client.run(os.getenv("BOT_TOKEN"))
