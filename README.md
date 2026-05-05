@@ -10,7 +10,6 @@ Feel free to use it in any NON COMMERCIAL projects, and suggestions are always w
 
 All customization will happen in `system_settings.py` **VERY IMPORTANT** to change the list of pre-defined responses to suit your needs. put as many as you would like!
 
-
 ## Setup and installation
 
 ```bash
@@ -31,7 +30,7 @@ Next, edit `system_settings.py` to have YOUR responses instead of the default pl
 
 **Best practice** for writing responses: restate the question in the answer ("Go to #tickets" -> "To make a support ticket, go to #tickets")
 
-Then run the bot 
+Then run the bot
 
 ```bash
 python bot.py
@@ -40,4 +39,3 @@ python bot.py
 ---
 
 I plan to continue updating this, so the current version will probably not be the last!
-
