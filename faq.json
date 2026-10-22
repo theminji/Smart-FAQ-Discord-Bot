@@ -20,6 +20,15 @@
                 "Where can I get support?"
             ],
             "answer": "Open a ticket in #support."
+        },
+        {
+            "id": 3,
+            "questions": [
+                "Where can I find the server rules?",
+                "What are the rules?",
+                "How do I view the rules?"
+            ],
+            "answer": "You can find all server rules in the #rules channel."
         }
     ]
 }

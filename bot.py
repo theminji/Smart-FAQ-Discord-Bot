@@ -6,6 +6,8 @@ import asyncio
 import json
 from sentence_transformers import SentenceTransformer
 import numpy as np
+from pagination import Pagination
+
 load_dotenv()
 
 # setup the bot
@@ -105,148 +107,183 @@ async def on_message(message):
 # this command/function is optional, it just allows for smoohter moderation with users without revealing who sent it
 @tree.command(name="adminmessage", description="Send an anonymous message in the current channel (admins only)")
 async def admin_message(interaction: discord.Interaction, message: str):
-    if interaction.user.guild_permissions.kick_members: # make sure the user is a mod/admin before running the command
-        await interaction.response.send_message("Sending anonymous message", ephemeral=True)
-        channel = interaction.channel
-        embed = discord.Embed(
-            color=discord.Color.gold(), # you can replace this with any color you want, I just like the gold color https://discordpy.readthedocs.io/en/latest/api.html?highlight=color#discord.Colour.gold
-            title="Message from admins",
-            description=message
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
         )
-        await channel.send(embed=embed)
-    else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
-
+        return # make sure the user is a mod/admin before running the command
+    await interaction.response.send_message("Sending anonymous message", ephemeral=True)
+    channel = interaction.channel
+    embed = discord.Embed(
+        color=discord.Color.gold(), # you can replace this with any color you want, I just like the gold color https://discordpy.readthedocs.io/en/latest/api.html?highlight=color#discord.Colour.gold
+        title="Message from admins",
+        description=message
+    )
+    await channel.send(embed=embed)
 
 
 @tree.command(name="faq_add", description="Add a new FAQ response to the bot (admins only)")
 async def faq_add(interaction: discord.Interaction, answer: str, question_1: str, question_2: str = None, question_3: str = None):
-    if interaction.user.guild_permissions.kick_members:
-        questions = [q for q in [question_1, question_2, question_3] if q and q.strip()]
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
+    questions = [q for q in [question_1, question_2, question_3] if q and q.strip()]
 
-        # generate a unique ID for the new FAQ
-        new_id = max((faq["id"] for faq in responses["faqs"]), default=0) + 1
+    # generate a unique ID for the new FAQ
+    new_id = max((faq["id"] for faq in responses["faqs"]), default=0) + 1
 
-        faq_response = {
-            "id": new_id,
-            "questions": questions,
-            "answer": answer
-        }
+    faq_response = {
+        "id": new_id,
+        "questions": questions,
+        "answer": answer
+    }
 
-        responses["faqs"].append(faq_response)  # add the new FAQ response to the list
+    responses["faqs"].append(faq_response)  # add the new FAQ response to the list
+
+    with open("faq.json", "w", encoding="utf-8") as file:
+        json.dump(responses, file, indent=4, ensure_ascii=False) # update faq.json file
+    update_faq_entries()
+    
+    embed = discord.Embed(
+        color=discord.Color.green(),
+        description=f"**ID:** {new_id}\n**Questions:**\n" + "\n".join(f"- {q}" for q in questions) + f"\n\n**Answer:**\n{answer}"
+    )
+    await interaction.response.send_message("New FAQ response added successfully!", embed=embed) # let the user know that the new FAQ response was added
+
+
+@tree.command(name="faq_remove", description="Remove an existing FAQ response from the bot (admins only)")
+async def faq_remove(interaction: discord.Interaction, faq_id: int):
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
+    faq_response = next((faq for faq in responses["faqs"] if faq["id"] == faq_id), None)
+
+    if faq_response:
+        responses["faqs"].remove(faq_response)
 
         with open("faq.json", "w", encoding="utf-8") as file:
             json.dump(responses, file, indent=4, ensure_ascii=False) # update faq.json file
         update_faq_entries()
         
         embed = discord.Embed(
-            color=discord.Color.green(),
-            description=f"**ID:** {new_id}\n**Questions:**\n" + "\n".join(f"- {q}" for q in questions) + f"\n\n**Answer:**\n{answer}"
+            color=discord.Color.red(),
+            description=f"**ID:** {faq_id}\n**Questions:**\n" + "\n".join(f"- {q}" for q in faq_response["questions"]) + f"\n\n**Answer:**\n{faq_response['answer']}"
         )
-        await interaction.response.send_message("New FAQ response added successfully!", embed=embed) # let the user know that the new FAQ response was added
+        await interaction.response.send_message("FAQ response removed successfully!", embed=embed) # let the user know that the FAQ response was removed
     else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
-
-
-@tree.command(name="faq_remove", description="Remove an existing FAQ response from the bot (admins only)")
-async def faq_remove(interaction: discord.Interaction, faq_id: int):
-    if interaction.user.guild_permissions.kick_members:
-        faq_response = next((faq for faq in responses["faqs"] if faq["id"] == faq_id), None)
-
-        if faq_response:
-            responses["faqs"].remove(faq_response)
-
-            with open("faq.json", "w", encoding="utf-8") as file:
-                json.dump(responses, file, indent=4, ensure_ascii=False) # update faq.json file
-            update_faq_entries()
-            
-            embed = discord.Embed(
-                color=discord.Color.red(),
-                description=f"**ID:** {faq_id}\n**Questions:**\n" + "\n".join(f"- {q}" for q in faq_response["questions"]) + f"\n\n**Answer:**\n{faq_response['answer']}"
-            )
-            await interaction.response.send_message("FAQ response removed successfully!", embed=embed) # let the user know that the FAQ response was removed
-        else:
-            await interaction.response.send_message("FAQ response not found! Use /faq_list to see all available responses and their IDs.", ephemeral=True) # let the user know that the FAQ response was not found
-
-    else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
+        await interaction.response.send_message("FAQ response not found! Use /faq_list to see all available responses and their IDs.", ephemeral=True) # let the user know that the FAQ response was not found
 
 
 @tree.command(name="faq_list", description="List all available FAQ responses")
 async def faq_list(interaction: discord.Interaction):
-    if interaction.user.guild_permissions.kick_members:
-        if not responses["faqs"]:
-            await interaction.response.send_message("No FAQ responses available.", ephemeral=True)
-        else:
-            embed = discord.Embed(
-                color=discord.Color.blue(),
-                description="\n\n".join(
-                    f"**ID: {faq['id']}**\n"
-                    f"**Questions:**\n" + "\n".join(f"- {q}" for q in faq["questions"]) +
-                    f"\n**Answer:** {faq['answer']}"
-                    for faq in responses["faqs"]
-                )
-            )
-            await interaction.response.send_message("Available FAQ responses:", embed=embed, ephemeral=True) # send the list of FAQ responses to the user
-    else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
 
+    if not responses["faqs"]:
+        await interaction.response.send_message(
+            "No FAQ responses available.",
+            ephemeral=True
+        )
+        return
+
+    FAQs_PER_PAGE = 5
+
+    async def get_page(page: int):
+        total_pages = Pagination.compute_total_pages(
+            len(responses["faqs"]), FAQs_PER_PAGE
+        )
+
+        offset = (page - 1) * FAQs_PER_PAGE
+        page_faqs = responses["faqs"][offset:offset + FAQs_PER_PAGE]
+
+        embed = discord.Embed(
+            title="Available FAQ Responses",
+            color=discord.Color.blue(),
+            description="\n\n".join(
+                f"**ID: {faq['id']}**\n"
+                f"**Questions:**\n"
+                + "\n".join(f"- {q}" for q in faq["questions"])
+                + f"\n**Answer:** {faq['answer']}"
+                for faq in page_faqs
+            )
+        )
+
+        embed.set_footer(text=f"Page {page} of {total_pages}")
+
+        return embed, total_pages
+
+    await Pagination(interaction, get_page).navigate()
+    
 @tree.command(name="faq_set_threshold", description="Edit or show the FAQ activation threshold")
 async def faq_set_threshold(interaction: discord.Interaction, new_threshold: float = None):
     global faq_threshold
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
+    if new_threshold is not None:
+        if 0 <= new_threshold <= 1:
+            faq_threshold = new_threshold
+            responses["settings"]["faq_threshold"] = faq_threshold
 
-    if interaction.user.guild_permissions.kick_members:
-        if new_threshold is not None:
-            if 0 <= new_threshold <= 1:
-                faq_threshold = new_threshold
-                responses["settings"]["faq_threshold"] = faq_threshold
+            with open("faq.json", "w", encoding="utf-8") as file:
+                json.dump(responses, file, indent=4, ensure_ascii=False)
 
-                with open("faq.json", "w", encoding="utf-8") as file:
-                    json.dump(responses, file, indent=4, ensure_ascii=False)
-
-                await interaction.response.send_message(f"FAQ threshold updated to: {faq_threshold}", ephemeral=True)
-            else:
-                await interaction.response.send_message("Invalid threshold value. Please provide a value between 0 and 1.", ephemeral=True)
+            await interaction.response.send_message(f"FAQ threshold updated to: {faq_threshold}", ephemeral=True)
         else:
-            await interaction.response.send_message(f"Current FAQ threshold: {faq_threshold}", ephemeral=True)
+            await interaction.response.send_message("Invalid threshold value. Please provide a value between 0 and 1.", ephemeral=True)
     else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
-
+        await interaction.response.send_message(f"Current FAQ threshold: {faq_threshold}", ephemeral=True)
+        
 
 @tree.command(name="faq_test", description="Test the FAQ response for a question without sending it publicly")
 async def faq_test(interaction: discord.Interaction, question: str):
-    if interaction.user.guild_permissions.kick_members:
-        global faq_threshold
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
+    global faq_threshold
 
-        best_faq = None
-        best_score = -1.0
+    best_faq = None
+    best_score = -1.0
 
-        async with embedding_lock:
-            query_embedding = await asyncio.to_thread(
-                model.encode,
-                question,
-                normalize_embeddings=True
-            )
+    async with embedding_lock:
+        query_embedding = await asyncio.to_thread(
+            model.encode,
+            question,
+            normalize_embeddings=True
+        )
 
-        embedding_index = 0
+    embedding_index = 0
 
-        for faq in responses["faqs"]:
-            for q in faq["questions"]:
-                score = float(question_embeddings[embedding_index] @ query_embedding)
+    for faq in responses["faqs"]:
+        for q in faq["questions"]:
+            score = float(question_embeddings[embedding_index] @ query_embedding)
 
-                if score > best_score:
-                    best_score = score
-                    best_faq = faq
+            if score > best_score:
+                best_score = score
+                best_faq = faq
 
-                embedding_index += 1
+            embedding_index += 1
 
-        if best_faq and best_score >= faq_threshold:
-            await interaction.response.send_message(f"Test result for '{question}': {best_faq['answer']}\nScore {best_score:.2f}", ephemeral=True)
-        else:
-            await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
+    if best_faq and best_score >= faq_threshold:
+        await interaction.response.send_message(f"Test result for '{question}': {best_faq['answer']}\nScore {best_score:.2f}", ephemeral=True)
     else:
-        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
-
-
+        await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
 
 client.run(os.getenv("BOT_TOKEN"))
