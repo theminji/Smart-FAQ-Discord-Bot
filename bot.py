@@ -95,6 +95,7 @@ async def faq_remove(interaction: discord.Interaction, faq_response: str):
 
             with open("faq.json", "w", encoding="utf-8") as file:
                 json.dump(responses, file, indent=4) # update faq.json file
+                
                 embed = discord.Embed(
                     color=discord.Color.red(),
                     description=faq_response

@@ -6,7 +6,7 @@ It uses an Embeddings Reranker model (by default, `BAAI/bge-reranker-v2-m3`, but
 
 This is NOT an LLM or "ChatGPT", so it doesn't generate the responses out of nowhere, it selects them from a predefined list of responses.
 
-Feel free to use it in any NON COMMERCIAL projects, and suggestions are always welcome 🤗
+Feel free to use it in any of your servers, and suggestions are always welcome in the issues tab 🤗
 
 Customization will happen in `system_settings.py`, and the actual FAQ responses are in `faq.json`. **VERY IMPORTANT** to change the list of pre-defined responses to suit your needs. put as many as you would like!
 
@@ -37,6 +37,8 @@ python bot.py
 ```
 
 You can use slash commands to edit and list the FAQ responses without having to ssh into the server and manually edit the file every time. The commands are `/faq_list`, `/faq_add`, and `/faq_remove`.
+
+There is also a `/adminmessage` command in case you want to use it, but it can be removed without impacting any functionality of the bot.
 
 ---
 
