@@ -18,17 +18,19 @@ git clone https://github.com/theminji/Smart-FAQ-Discord-Bot.git
 
 Then edit `.env.example` to have your Discord bot token, and rename to `.env`
 
+> Make sure your bot has messages intent enabled in Discord developer portal, and it should have read messages and send messages permissions.
+
 After that, make a venv and install the requirements
 
 ```bash
-python -m venv .venv
+uv venv # or python -m venv .venv
 source .venv/bin/activate # or .venv\Scripts\activate for Windows
-pip install -r requirements.txt
+uv pip install -r requirements.txt # or omit uv if using regular python venv
 ```
 
-Next, edit `system_settings.py` to have YOUR responses instead of the default placeholders
+Next, edit `faq.json` to have YOUR responses instead of the default placeholders
 
-**Best practice** for writing responses: restate the question in the answer ("Go to #tickets" -> "To make a support ticket, go to #tickets")
+**Best practice** for writing responses: restate the question in the answer ("Go to #tickets" -> "To make a support tickset, go to #tickets")
 
 Then run the bot
 
