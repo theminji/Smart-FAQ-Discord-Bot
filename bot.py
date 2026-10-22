@@ -19,13 +19,15 @@ tree = app_commands.CommandTree(client)
 reranker = FlagReranker(system_settings.reranker_model, use_fp16=True)
 print("Model loaded")
 
-# load the list of possible responses that the bot can give (in system_settings.py)
+# load faq.json and grab all the data
 with open("faq.json", "r") as f:
-    responses = json.load(f)
+    data = json.load(f)
 
-# Put this near your other global variables
+responses = data["faqs"]
+faq_threshold = data["settings"]["faq_threshold"]
+
+# async lock
 reranker_lock = asyncio.Lock()
-
 
 # async handle the user message so it doesnt get backloged
 async def handle_message(message: discord.Message):
@@ -52,7 +54,7 @@ async def handle_message(message: discord.Message):
 
     # send FAQ response if one is high enough (take the max)
     best_score = max(scores)
-    if best_score > 0.3: # change this value if you want more or less sensitive (higher number means higher similarity threshold, which means it is less sensitive)
+    if best_score > faq_threshold: # change this with a slash command or in faq.json
         best_index = scores.index(best_score)
         await message.reply(responses[best_index])
 
@@ -144,4 +146,25 @@ async def faq_list(interaction: discord.Interaction):
     else:
         await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
 
+@tree.command(name="faq_set_threshold", description="Edit or show the FAQ activation threshold")
+async def faq_set_threshold(interaction: discord.Interaction, new_threshold: float = None):
+    global faq_threshold
+
+    if interaction.user.guild_permissions.kick_members:
+        if new_threshold is not None:
+            if 0 <= new_threshold <= 1:
+                faq_threshold = new_threshold
+                with open("faq.json", "r+") as file:
+                    data = json.load(file)
+                    data["settings"]["faq_threshold"] = faq_threshold
+                    file.seek(0)
+                    json.dump(data, file, indent=4)
+                    file.truncate()
+                await interaction.response.send_message(f"FAQ threshold updated to: {faq_threshold}", ephemeral=True)
+            else:
+                await interaction.response.send_message("Invalid threshold value. Please provide a value between 0 and 1.", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"Current FAQ threshold: {faq_threshold}", ephemeral=True)
+    else:
+        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
 client.run(os.getenv("BOT_TOKEN"))
