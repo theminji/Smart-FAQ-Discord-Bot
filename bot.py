@@ -23,17 +23,32 @@ print("Model loaded")
 with open("faq.json", "r") as f:
     responses = json.load(f)
 
+# Put this near your other global variables
+reranker_lock = asyncio.Lock()
+
+
 # async handle the user message so it doesnt get backloged
 async def handle_message(message: discord.Message):
+    if not responses: # if the list of responses is empty, just return and do nothing
+        return
+
     # prep the lists for similarity scoring
     lists = []
     # grab user input
-    q = message.content
-    for response in responses:
-        lists.append([q, response])
-
+    q = message.content.strip()
+    if not q:
+        return
+    
+    pairs = [[q, response] for response in responses]
+    
     # actual calculation for which (if any) response to send
-    scores = reranker.compute_score(lists, normalize=True)
+    async with reranker_lock:
+        scores = await asyncio.to_thread(
+            reranker.compute_score,
+            pairs,
+            normalize=True
+        )
+
 
     # send FAQ response if one is high enough (take the max)
     best_score = max(scores)
@@ -50,8 +65,16 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user: # skip the messages from this bot
+    # message filtering so we can be sure it is only from a user and not other bots or dms or anything
+    if message.author == client.user:
         return
+    if message.author.bot:
+        return
+    if not message.guild:
+        return
+    if not message.content.strip():
+        return
+
     # async handle message so that the bot doesnt get backlogged
     asyncio.create_task(handle_message(message))
 
