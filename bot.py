@@ -38,7 +38,7 @@ async def handle_message(message: discord.Message):
 
     # send FAQ response if one is high enough (take the max)
     best_score = max(scores)
-    if best_score > 0.4: # change this value if you want more or less sensitive (higher number means higher similarity threshold)
+    if best_score > 0.3: # change this value if you want more or less sensitive (higher number means higher similarity threshold, which means it is less sensitive)
         best_index = scores.index(best_score)
         await message.reply(responses[best_index])
 
@@ -71,4 +71,21 @@ async def admin_message(interaction: discord.Interaction, message: str):
     else:
         await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
 
+
+@tree.command(name="faq_add", description="Add a new FAQ response to the bot (admins only)")
+async def faq_add(interaction: discord.Interaction, faq_response: str):
+    responses.append(faq_response)  # add the new FAQ response to the list
+
+    with open("faq.json", "w", encoding="utf-8") as file:
+        json.dump(responses, file, indent=4) # update faq.json file
+        channel = interaction.channel
+    if interaction.user.guild_permissions.kick_members: 
+        embed = discord.Embed(
+            color=discord.Color.green(),
+            description=faq_response
+        )
+        await channel.send("New FAQ response added successfully!", embed=embed) # let the user know that the new FAQ response was added
+    else:
+        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
+        
 client.run(os.getenv("BOT_TOKEN"))
