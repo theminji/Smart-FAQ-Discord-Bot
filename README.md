@@ -30,13 +30,15 @@ uv pip install -r requirements.txt # or omit uv if using regular python venv
 
 Next, edit `faq.json` to have YOUR responses and example questions to trigger the response instead of the default placeholders. You can follow the examples to get good results.
 
+A good starting threshold is around 0.7-0.8, but you can tune it based on your needs (it must be a float between 0 and 1, where 1 will only trigger if it is exactly matched, and 0 will always trigger.)
+
 Then run the bot
 
 ```bash
 python bot.py
 ```
 
-You can use slash commands to edit and list the FAQ responses without having to ssh into the server and manually edit the file every time. The commands are `/faq_list`, `/faq_add`, and `/faq_remove`.
+You can use slash commands to edit and list the FAQ responses without having to ssh into the server and manually edit the file every time. The commands are `/faq_list`, `/faq_add`, `faq_set_threshold` and `/faq_remove`. There is also `/faq_test` to test how the bot responds and what scores it is giving out for queries so you can tune it better.
 
 There is also a `/adminmessage` command in case you want to use it, but it can be removed without impacting any functionality of the bot.
 

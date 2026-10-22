@@ -208,4 +208,36 @@ async def faq_set_threshold(interaction: discord.Interaction, new_threshold: flo
     else:
         await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
 
+
+@tree.command(name="faq_test", description="Test the FAQ response for a question without sending it publicly")
+async def faq_test(interaction: discord.Interaction, question: str):
+    global faq_threshold
+
+    best_faq = None
+    best_score = -1.0
+
+    async with embedding_lock:
+        query_embedding = await asyncio.to_thread(
+            model.encode,
+            question,
+            normalize_embeddings=True
+        )
+
+    embedding_index = 0
+
+    for faq in responses["faqs"]:
+        for q in faq["questions"]:
+            score = float(question_embeddings[embedding_index] @ query_embedding)
+
+            if score > best_score:
+                best_score = score
+                best_faq = faq
+
+            embedding_index += 1
+
+    if best_faq and best_score >= faq_threshold:
+        await interaction.response.send_message(f"Test result for '{question}': {best_faq['answer']}\nScore {best_score:.2f}", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
+
 client.run(os.getenv("BOT_TOKEN"))
