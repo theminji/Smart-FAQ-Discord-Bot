@@ -37,7 +37,7 @@ async def handle_message(message: discord.Message):
 
     # send FAQ response if one is high enough (take the max)
     best_score = max(scores)
-    if best_score > 0.25:
+    if best_score > 0.4: # change this value if you want more or less sensitive (higher number means higher similarity threshold)
         best_index = scores.index(best_score)
         await message.reply(responses[best_index])
 
