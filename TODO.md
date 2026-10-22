@@ -1,31 +1,9 @@
 /faq_test
 
-/faq_threshold
+~~/faq_threshold~~ - done
 
 faq analytics
 
-change faq structure to 
+~~change faq structure~~ - done
 
-```
-
-[
-  {
-    "id": 1,
-    "questions": [
-      "How do I get verified?",
-      "Where can I verify?",
-      "How do I unlock the server?"
-    ],
-    "answer": "Go to #verification and click the green button."
-  },
-  {
-    "id": 2,
-    "questions": [
-      "How do I contact staff?",
-      "How do I open a ticket?",
-      "Where can I get support?"
-    ],
-    "answer": "Open a ticket in #support."
-  }
-]
-```
+~~migrate to embeddings instead of reranker with the new structure~~ - done
