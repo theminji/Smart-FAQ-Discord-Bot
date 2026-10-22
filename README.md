@@ -2,13 +2,13 @@
 
 This is a Discord.py bot that I made to help out server staff with FAQs.
 
-It uses an Embeddings Reranker model (by default, `BAAI/bge-reranker-v2-m3`, but can be changed in `system_settings.py`) to intelligently determine what response to give and when to user messages.
+It uses an Embeddings model (by default, `sentence-transformers/all-MiniLM-L6-v23`, but can be changed in `bot.py`) to intelligently determine what response to give and when to user messages.
 
 This is NOT an LLM or "ChatGPT", so it doesn't generate the responses out of nowhere, it selects them from a predefined list of responses.
 
 Feel free to use it in any of your servers, and suggestions are always welcome in the issues tab 🤗
 
-Customization will happen in `system_settings.py`, and the actual FAQ responses are in `faq.json`. **VERY IMPORTANT** to change the list of pre-defined responses to suit your needs. put as many as you would like!
+The actual FAQ responses are in `faq.json`. **VERY IMPORTANT** to change the list of pre-defined responses to suit your needs. put as many as you would like! They can be edited later with slash commands inside Discord whenever you want.
 
 ## Setup and installation
 
@@ -28,9 +28,7 @@ source .venv/bin/activate # or .venv\Scripts\activate for Windows
 uv pip install -r requirements.txt # or omit uv if using regular python venv
 ```
 
-Next, edit `faq.json` to have YOUR responses instead of the default placeholders
-
-**Best practice** for writing responses: restate the question in the answer ("Go to #tickets" -> "To make a support tickset, go to #tickets")
+Next, edit `faq.json` to have YOUR responses and example questions to trigger the response instead of the default placeholders. You can follow the examples to get good results.
 
 Then run the bot
 
