@@ -1,6 +1,6 @@
 {
     "settings": {
-        "faq_threshold": 0.33
+        "faq_threshold": 0.7
     },
     "faqs": [
         {
@@ -20,14 +20,6 @@
                 "Where can I get support?"
             ],
             "answer": "Open a ticket in #support."
-        },
-        {
-            "id": 3,
-            "questions": [
-                "I am testing this",
-                "Can you do a test?"
-            ],
-            "answer": "This is a test"
         }
     ]
 }

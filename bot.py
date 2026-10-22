@@ -133,6 +133,7 @@ async def faq_add(interaction: discord.Interaction, answer: str, question_1: str
 
         with open("faq.json", "w", encoding="utf-8") as file:
             json.dump(responses, file, indent=4, ensure_ascii=False) # update faq.json file
+        update_faq_entries()
         
         embed = discord.Embed(
             color=discord.Color.green(),
@@ -153,7 +154,8 @@ async def faq_remove(interaction: discord.Interaction, faq_id: int):
 
             with open("faq.json", "w", encoding="utf-8") as file:
                 json.dump(responses, file, indent=4, ensure_ascii=False) # update faq.json file
-
+            update_faq_entries()
+            
             embed = discord.Embed(
                 color=discord.Color.red(),
                 description=f"**ID:** {faq_id}\n**Questions:**\n" + "\n".join(f"- {q}" for q in faq_response["questions"]) + f"\n\n**Answer:**\n{faq_response['answer']}"
