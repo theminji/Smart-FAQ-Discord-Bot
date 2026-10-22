@@ -19,12 +19,6 @@ tree = app_commands.CommandTree(client)
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2") # change this if you want to any embedding model
 print("Model loaded")
 
-# load faq.json and grab all the data
-with open("faq.json", "r", encoding="utf-8") as file:
-    responses = json.load(file)
-
-faq_threshold = responses["settings"]["faq_threshold"]
-
 # async lock
 embedding_lock = asyncio.Lock()
 
@@ -46,7 +40,20 @@ def update_faq_entries():
         if entries else None
     )
 
-update_faq_entries()
+# helper function to reload the faq.json file and update the entries and embeddings
+def reload_faqs():
+    global responses, faq_threshold
+
+    with open("faq.json", "r", encoding="utf-8") as file:
+        responses = json.load(file)
+
+    faq_threshold = responses["settings"]["faq_threshold"]
+
+    update_faq_entries()
+    
+
+# load faq.json and grab all the data
+reload_faqs()
 
 # async handle the user message so it doesnt get backloged
 async def handle_message(message: discord.Message):
@@ -189,7 +196,7 @@ async def faq_list(interaction: discord.Interaction):
             ephemeral=True
         )
         return
-
+    reload_faqs()
     if not responses["faqs"]:
         await interaction.response.send_message(
             "No FAQ responses available.",
