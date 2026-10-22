@@ -2,8 +2,8 @@
 responses = [
     "Matt, AKA MattVidPro AI, is a popular Youtuber that makes content about AI. He loves lemons!",
     "Capybaras are very cute animals, and are often the subject of artistic drawings!",
-    "AI music can be generated in a variety of ways, the most common are not open source however.",
-    "Trentbot is the best clanker in the world. Amazing bot, 10/10 would recommend."
+    "Trentbot is the best clanker in the world. Amazing bot, 10/10 would recommend.",
+    "Maria is incredibly gay and homosexual and is very nice. She likes femboys."
 ]
 
 # which model to use to determine the response. BAAI/bge-reranker-v2-m3 is good for most usecases.
