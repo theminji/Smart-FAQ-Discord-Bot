@@ -36,6 +36,8 @@ Then run the bot
 python bot.py
 ```
 
+You can use slash commands to edit and list the FAQ responses without having to ssh into the server and manually edit the file every time. The commands are `/faq_list`, `/faq_add`, and `/faq_remove`.
+
 ---
 
 I plan to continue updating this, so the current version will probably not be the last!
