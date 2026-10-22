@@ -24,54 +24,56 @@ with open("faq.json", "r", encoding="utf-8") as file:
 faq_threshold = responses["settings"]["faq_threshold"]
 
 # async lock
-reranker_lock = asyncio.Lock()
+embedding_lock = asyncio.Lock()
 
 # helper function to update the faq entries when a new one is added or removed
 def update_faq_entries():
-    global entries
+    global entries, question_embeddings
 
     entries = [
         (question, faq)
         for faq in responses["faqs"]
         for question in faq["questions"]
     ]
+
+    question_embeddings = (
+        model.encode(
+            [question for question, faq in entries],
+            normalize_embeddings=True
+        )
+        if entries else None
+    )
+
+update_faq_entries()
 
 # async handle the user message so it doesnt get backloged
 async def handle_message(message: discord.Message):
-    if not responses["faqs"]: # if the list of responses is empty, just return and do nothing
-        return
-
-    # turn the json list of questions into usable list of strings for the bot to use
-    entries = [
-        (question, faq)
-        for faq in responses["faqs"]
-        for question in faq["questions"]
-    ]
-
-    if not entries:
-        return
-
-    # grab user input
     q = message.content.strip()
     if not q:
         return
 
-    pairs = [[q, question] for question, faq in entries]
+    # Capture matching FAQ entries and embeddings together
+    current_entries = entries
+    current_embeddings = question_embeddings
 
-    # do the actual calculation of which to use for the response
-    async with reranker_lock:
-        scores = await asyncio.to_thread(
-            reranker.compute_score,
-            pairs,
-            normalize=True
+    if not current_entries:
+        return
+
+    async with embedding_lock:
+        query_embedding = await asyncio.to_thread(
+            model.encode,
+            q,
+            normalize_embeddings=True
         )
 
-    # send FAQ response if one is high enough (take the max)
-    best_index = max(range(len(scores)), key=lambda i: scores[i])
-    best_score = scores[best_index]
+    # Find the closest question using cosine similarity
+    scores = current_embeddings @ query_embedding
 
-    if best_score > faq_threshold: # change this with a slash command or in faq.json
-        best_question, best_faq = entries[best_index]
+    best_index = int(np.argmax(scores))
+    best_score = float(scores[best_index])
+
+    if best_score >= faq_threshold:
+        best_question, best_faq = current_entries[best_index]
         await message.reply(best_faq["answer"])
 
 # login the bot
