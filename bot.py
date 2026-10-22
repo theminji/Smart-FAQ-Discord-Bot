@@ -21,7 +21,8 @@ reranker = FlagReranker(system_settings.reranker_model, use_fp16=True)
 print("Model loaded")
 
 # load the list of possible responses that the bot can give (in system_settings.py)
-responses = system_settings.responses
+with open("faq.json", "r") as f:
+    responses = json.load(f)
 
 # async handle the user message so it doesnt get backloged
 async def handle_message(message: discord.Message):
