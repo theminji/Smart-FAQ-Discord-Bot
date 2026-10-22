@@ -78,14 +78,13 @@ async def faq_add(interaction: discord.Interaction, faq_response: str):
 
     with open("faq.json", "w", encoding="utf-8") as file:
         json.dump(responses, file, indent=4) # update faq.json file
-        channel = interaction.channel
     if interaction.user.guild_permissions.kick_members: 
         embed = discord.Embed(
             color=discord.Color.green(),
             description=faq_response
         )
-        await channel.send("New FAQ response added successfully!", embed=embed) # let the user know that the new FAQ response was added
+        await interaction.response.send_message("New FAQ response added successfully!", embed=embed) # let the user know that the new FAQ response was added
     else:
         await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
-        
+
 client.run(os.getenv("BOT_TOKEN"))
