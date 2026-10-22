@@ -3,7 +3,6 @@ from discord import app_commands
 import os
 from dotenv import load_dotenv
 import asyncio
-import datetime
 import json
 from FlagEmbedding import FlagReranker
 import system_settings
