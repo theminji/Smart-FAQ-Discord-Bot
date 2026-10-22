@@ -20,6 +20,14 @@
                 "Where can I get support?"
             ],
             "answer": "Open a ticket in #support."
+        },
+        {
+            "id": 3,
+            "questions": [
+                "I am testing this",
+                "Can you do a test?"
+            ],
+            "answer": "This is a test"
         }
     ]
 }
