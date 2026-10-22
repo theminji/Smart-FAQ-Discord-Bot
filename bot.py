@@ -98,6 +98,10 @@ async def on_message(message):
     # async handle message so that the bot doesnt get backlogged
     asyncio.create_task(handle_message(message))
 
+
+### SLASH COMMANDS ARE BELOW
+
+
 # this command/function is optional, it just allows for smoohter moderation with users without revealing who sent it
 @tree.command(name="adminmessage", description="Send an anonymous message in the current channel (admins only)")
 async def admin_message(interaction: discord.Interaction, message: str):
@@ -211,33 +215,38 @@ async def faq_set_threshold(interaction: discord.Interaction, new_threshold: flo
 
 @tree.command(name="faq_test", description="Test the FAQ response for a question without sending it publicly")
 async def faq_test(interaction: discord.Interaction, question: str):
-    global faq_threshold
+    if interaction.user.guild_permissions.kick_members:
+        global faq_threshold
 
-    best_faq = None
-    best_score = -1.0
+        best_faq = None
+        best_score = -1.0
 
-    async with embedding_lock:
-        query_embedding = await asyncio.to_thread(
-            model.encode,
-            question,
-            normalize_embeddings=True
-        )
+        async with embedding_lock:
+            query_embedding = await asyncio.to_thread(
+                model.encode,
+                question,
+                normalize_embeddings=True
+            )
 
-    embedding_index = 0
+        embedding_index = 0
 
-    for faq in responses["faqs"]:
-        for q in faq["questions"]:
-            score = float(question_embeddings[embedding_index] @ query_embedding)
+        for faq in responses["faqs"]:
+            for q in faq["questions"]:
+                score = float(question_embeddings[embedding_index] @ query_embedding)
 
-            if score > best_score:
-                best_score = score
-                best_faq = faq
+                if score > best_score:
+                    best_score = score
+                    best_faq = faq
 
-            embedding_index += 1
+                embedding_index += 1
 
-    if best_faq and best_score >= faq_threshold:
-        await interaction.response.send_message(f"Test result for '{question}': {best_faq['answer']}\nScore {best_score:.2f}", ephemeral=True)
+        if best_faq and best_score >= faq_threshold:
+            await interaction.response.send_message(f"Test result for '{question}': {best_faq['answer']}\nScore {best_score:.2f}", ephemeral=True)
+        else:
+            await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
     else:
-        await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
+        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
+
+
 
 client.run(os.getenv("BOT_TOKEN"))
