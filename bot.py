@@ -107,13 +107,16 @@ async def faq_remove(interaction: discord.Interaction, faq_response: str):
 
 @tree.command(name="faq_list", description="List all available FAQ responses")
 async def faq_list(interaction: discord.Interaction):
-    if not responses:
-        await interaction.response.send_message("No FAQ responses available.", ephemeral=True)
+    if interaction.user.guild_permissions.kick_members:
+        if not responses:
+            await interaction.response.send_message("No FAQ responses available.", ephemeral=True)
+        else:
+            embed = discord.Embed(
+                color=discord.Color.blue(),
+                description="\n".join(responses)
+            )
+            await interaction.response.send_message("Available FAQ responses:", embed=embed, ephemeral=True) # send the list of FAQ responses to the user
     else:
-        embed = discord.Embed(
-            color=discord.Color.blue(),
-            description="\n".join(responses)
-        )
-        await interaction.response.send_message("Available FAQ responses:", embed=embed, ephemeral=True) # send the list of FAQ responses to the user
+        await interaction.response.send_message("Hey you can't do that!", ephemeral=True) # let the non-admin/mod users know that they cant run this command
 
 client.run(os.getenv("BOT_TOKEN"))
