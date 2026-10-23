@@ -318,7 +318,7 @@ async def faq_stats(interaction: discord.Interaction):
         default=None
     )
 
-    if most_triggered_faq:
+    if most_triggered_faq and most_triggered_faq["times_triggered"] > 0:
         most_triggered_text = (
             f"{most_triggered_faq['questions'][0]} "
             f"({most_triggered_faq['times_triggered']} times)"
