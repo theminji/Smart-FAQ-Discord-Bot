@@ -1,3 +1,5 @@
+import random
+
 import discord
 from discord import app_commands
 import os
@@ -84,6 +86,9 @@ async def handle_message(message: discord.Message):
     if best_score >= faq_threshold:
         best_question, best_faq = current_entries[best_index]
         best_faq["times_triggered"] += 1
+        # update the faq.json file with the new times_triggered value
+        with open("faq.json", "w", encoding="utf-8") as file:
+            json.dump(responses, file, indent=4, ensure_ascii=False)
         await message.reply(best_faq["answer"])
 
 # login the bot
@@ -147,7 +152,8 @@ async def faq_add(interaction: discord.Interaction, answer: str, question_1: str
     faq_response = {
         "id": new_id,
         "questions": questions,
-        "answer": answer
+        "answer": answer,
+        "times_triggered": 0
     }
 
     responses["faqs"].append(faq_response)  # add the new FAQ response to the list
@@ -294,6 +300,7 @@ async def faq_test(interaction: discord.Interaction, question: str):
     else:
         await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
 
+
 @tree.command(name="faq_stats", description="See the stats about your FAQ bot")
 async def faq_stats(interaction: discord.Interaction):
     if not interaction.user.guild_permissions.kick_members:
@@ -304,13 +311,31 @@ async def faq_stats(interaction: discord.Interaction):
         return
 
     total_faqs_triggered = sum(faq["times_triggered"] for faq in responses["faqs"])
-    most_triggered_faq = max(responses["faqs"], key=lambda faq: faq["times_triggered"], default=None) if responses["faqs"] else None
+
+    most_triggered_faq = max(
+        responses["faqs"],
+        key=lambda faq: faq["times_triggered"],
+        default=None
+    )
+
+    if most_triggered_faq:
+        most_triggered_text = (
+            f"{most_triggered_faq['questions'][0]} "
+            f"({most_triggered_faq['times_triggered']} times)"
+        )
+    else:
+        most_triggered_text = "No FAQs have been triggered yet."
+
     embed = discord.Embed(
         title="FAQ Bot Stats",
         color=discord.Color.blue(),
-        description=f"Total FAQs triggered: {total_faqs_triggered}\n"
-                    f"Most triggered FAQ: {most_triggered_faq['questions'][0]} ({most_triggered_faq['times_triggered']} times)" if most_triggered_faq else "No FAQs have been triggered yet."
+        description=(
+            f"Total FAQs triggered: {total_faqs_triggered}\n"
+            f"Most triggered FAQ: {most_triggered_text}\n\n"
+        )
     )
+
     await interaction.response.send_message(embed=embed)
+
 
 client.run(os.getenv("BOT_TOKEN"))
