@@ -10,7 +10,8 @@
                 "Where can I verify?",
                 "How do I unlock the server?"
             ],
-            "answer": "Go to #verification and click the green button."
+            "answer": "Go to #verification and click the green button.",
+            "times_triggered": 0
         },
         {
             "id": 2,
@@ -19,7 +20,8 @@
                 "How do I open a ticket?",
                 "Where can I get support?"
             ],
-            "answer": "Open a ticket in #support."
+            "answer": "Open a ticket in #support.",
+            "times_triggered": 0
         },
         {
             "id": 3,
@@ -28,7 +30,8 @@
                 "What are the rules?",
                 "How do I view the rules?"
             ],
-            "answer": "You can find all server rules in the #rules channel."
+            "answer": "You can find all server rules in the #rules channel.",
+            "times_triggered": 0
         }
     ]
 }

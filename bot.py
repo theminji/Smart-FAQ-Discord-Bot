@@ -61,7 +61,7 @@ async def handle_message(message: discord.Message):
     if not q:
         return
 
-    # Capture matching FAQ entries and embeddings together
+    # capture matching FAQ entries and embeddings together
     current_entries = entries
     current_embeddings = question_embeddings
 
@@ -75,7 +75,7 @@ async def handle_message(message: discord.Message):
             normalize_embeddings=True
         )
 
-    # Find the closest question using cosine similarity
+    # find the closest question using cosine similarity
     scores = current_embeddings @ query_embedding
 
     best_index = int(np.argmax(scores))
@@ -83,6 +83,7 @@ async def handle_message(message: discord.Message):
 
     if best_score >= faq_threshold:
         best_question, best_faq = current_entries[best_index]
+        best_faq["times_triggered"] += 1
         await message.reply(best_faq["answer"])
 
 # login the bot
@@ -292,5 +293,24 @@ async def faq_test(interaction: discord.Interaction, question: str):
         await interaction.response.send_message(f"Test result for '{question}': {best_faq['answer']}\nScore {best_score:.2f}", ephemeral=True)
     else:
         await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
+
+@tree.command(name="faq_stats", description="See the stats about your FAQ bot")
+async def faq_stats(interaction: discord.Interaction):
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
+
+    total_faqs_triggered = sum(faq["times_triggered"] for faq in responses["faqs"])
+    most_triggered_faq = max(responses["faqs"], key=lambda faq: faq["times_triggered"], default=None) if responses["faqs"] else None
+    embed = discord.Embed(
+        title="FAQ Bot Stats",
+        color=discord.Color.blue(),
+        description=f"Total FAQs triggered: {total_faqs_triggered}\n"
+                    f"Most triggered FAQ: {most_triggered_faq['questions'][0]} ({most_triggered_faq['times_triggered']} times)" if most_triggered_faq else "No FAQs have been triggered yet."
+    )
+    await interaction.response.send_message(embed=embed)
 
 client.run(os.getenv("BOT_TOKEN"))
