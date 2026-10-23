@@ -2,7 +2,7 @@
 
 ~~/faq_threshold~~ - done
 
-faq analytics
+~~faq analytics~~ - WIP
 
 ~~change faq structure~~ - done
 
