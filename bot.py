@@ -209,15 +209,15 @@ async def faq_list(interaction: discord.Interaction):
         )
         return
 
-    FAQs_PER_PAGE = 5
+    results_per_page = 5
 
     async def get_page(page: int):
         total_pages = Pagination.compute_total_pages(
-            len(responses["faqs"]), FAQs_PER_PAGE
+            len(responses["faqs"]), results_per_page
         )
 
-        offset = (page - 1) * FAQs_PER_PAGE
-        page_faqs = responses["faqs"][offset:offset + FAQs_PER_PAGE]
+        offset = (page - 1) * results_per_page
+        page_faqs = responses["faqs"][offset:offset + results_per_page]
 
         embed = discord.Embed(
             title="Available FAQ Responses",
