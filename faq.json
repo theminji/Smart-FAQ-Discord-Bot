@@ -17,8 +17,8 @@
             "id": 2,
             "questions": [
                 "How do I contact staff?",
-                "How do I open a ticket?",
-                "Where can I get support?"
+                "How do I open a support ticket?",
+                "Where can I contact mods?"
             ],
             "answer": "Open a ticket in #support.",
             "times_triggered": 0

@@ -331,9 +331,9 @@ async def faq_stats(interaction: discord.Interaction):
         description=(
             f"Total FAQs triggered: {total_faqs_triggered}\n"
             f"Most triggered FAQ: {most_triggered_text}\n\n"
-        )
+        ),
     )
-
+    embed.add_field(name="Request more features", value="[on my Github](https://github.com/theminji/Smart-FAQ-Discord-Bot/issues)", inline=False)
     await interaction.response.send_message(embed=embed)
 
 # just learned about context menus so adding that for a manual FAQ trigger
