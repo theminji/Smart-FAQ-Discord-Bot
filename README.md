@@ -40,6 +40,8 @@ python bot.py
 
 You can use slash commands to edit and list the FAQ responses without having to ssh into the server and manually edit the file every time. The commands are `/faq_list`, `/faq_add`, `faq_set_threshold` and `/faq_remove`. There is also `/faq_test` to test how the bot responds and what scores it is giving out for queries so you can tune it better.
 
+Additionally I added a right click context menu to manually trigger an FAQ response (the moderator chooses what faq to activate). Just right click on any message and find "Apps" > {bot name} > Manual FAQ and then follow the instructions in the dropdown
+
 There is also a `/adminmessage` command in case you want to use it, but it can be removed without impacting any functionality of the bot.
 
 ---
