@@ -346,8 +346,6 @@ async def manual_faq(interaction: discord.Interaction, message: discord.Message)
         )
         return
     
-    question = message.content
-    
     # create the "view " (dropdown menu)
     faq_dropdown = SelectMenu(responses["faqs"], original_message=message)
     view = discord.ui.View()
