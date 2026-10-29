@@ -14,5 +14,5 @@ class SelectMenu(discord.ui.Select):
         index = int(self.values[0]) - 1 # -1 because its n + 1 for pretty viewing in the actual menu
         faq = self.faqs[index]
 
-        await self.original_message.reply(faq['answer'])
-        await interaction.response.send_message(f"FAQ {self.values[0]} triggered!", ephemeral=True)
+        await self.original_message.reply(faq['answer']) # reply to the original message that triggered we did the right click on
+        await interaction.response.defer() # close out the interaction response so it doesnt hang

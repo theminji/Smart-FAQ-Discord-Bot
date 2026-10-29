@@ -352,7 +352,7 @@ async def manual_faq(interaction: discord.Interaction, message: discord.Message)
     faq_dropdown = SelectMenu(responses["faqs"], original_message=message)
     view = discord.ui.View()
     view.add_item(faq_dropdown)
-    await interaction.response.send_message(f"Select which FAQ to trigger!", view=view, ephemeral=True)
+    await interaction.response.send_message(view=view, ephemeral=True)
     # the callback in select_menu.py will automatically trigger the response to the original message, so dont worry about that here
 
 client.run(os.getenv("BOT_TOKEN"))
