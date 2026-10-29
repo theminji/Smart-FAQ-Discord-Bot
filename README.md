@@ -2,6 +2,9 @@
 
 This is a Discord.py bot that I made to help out server staff with FAQs.
 
+![screenshot of the bot](assets/screenshot.png)
+
+
 It uses an Embeddings model (by default, `sentence-transformers/all-MiniLM-L6-v23`, but can be changed in `bot.py`) to intelligently determine what response to give and when to user messages.
 
 This is NOT an LLM or "ChatGPT", so it doesn't generate the responses out of nowhere, it selects them from a predefined list of responses.
