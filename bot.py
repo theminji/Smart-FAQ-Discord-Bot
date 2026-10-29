@@ -354,3 +354,8 @@ async def manual_faq(interaction: discord.Interaction, message: discord.Message)
     # the callback in select_menu.py will automatically trigger the response to the original message, so dont worry about that here
 
 client.run(os.getenv("BOT_TOKEN"))
+
+## btw the reason im using
+# if not interaction.user.guild_permissions.kick_members:
+# for all the commands that require admin permissions is because some servers dont give hteir mods full admin perms, 
+# so i check for kick_members permission instead of full admin permissions to include all those mods
