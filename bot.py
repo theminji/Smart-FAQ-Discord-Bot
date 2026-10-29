@@ -7,6 +7,7 @@ import json
 from sentence_transformers import SentenceTransformer
 import numpy as np
 from pagination import Pagination
+from select_menu import SelectMenu
 
 load_dotenv()
 
@@ -335,5 +336,23 @@ async def faq_stats(interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed)
 
+# just learned about context menus so adding that for a manual FAQ trigger
+@tree.context_menu(name="Manual FAQ")
+async def manual_faq(interaction: discord.Interaction, message: discord.Message):
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message(
+            "Hey you can't do that!",
+            ephemeral=True
+        )
+        return
+    
+    question = message.content
+    
+    # create the "view " (dropdown menu)
+    faq_dropdown = SelectMenu(responses["faqs"], original_message=message)
+    view = discord.ui.View()
+    view.add_item(faq_dropdown)
+    await interaction.response.send_message(f"Select which FAQ to trigger!", view=view, ephemeral=True)
+    # the callback in select_menu.py will automatically trigger the response to the original message, so dont worry about that here
 
 client.run(os.getenv("BOT_TOKEN"))
