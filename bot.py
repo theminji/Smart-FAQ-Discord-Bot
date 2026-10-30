@@ -329,6 +329,7 @@ async def faq_stats(interaction: discord.Interaction):
         title="FAQ Bot Stats",
         color=discord.Color.blue(),
         description=(
+            f"Your server has {len(responses['faqs'])} FAQs configured.\n"
             f"Total FAQs triggered: {total_faqs_triggered}\n"
             f"Most triggered FAQ: {most_triggered_text}\n\n"
         ),
