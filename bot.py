@@ -112,19 +112,25 @@ async def on_message(message):
     # async handle message so that the bot doesnt get backlogged
     asyncio.create_task(handle_message(message))
 
-
+@tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.errors.MissingPermissions):
+        await interaction.response.send_message(
+            "You do not have permission to run this command.", 
+            ephemeral=True
+        )
+    else:
+        # fallback for other unexpected errors so they still print to console
+        print(f"Unhandled error: {error}")
+        
+        
 ### SLASH COMMANDS ARE BELOW
 
 
 # this command/function is optional, it just allows for smoohter moderation with users without revealing who sent it
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="adminmessage", description="Send an anonymous message in the current channel (admins only)")
 async def admin_message(interaction: discord.Interaction, message: str):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return # make sure the user is a mod/admin before running the command
     await interaction.response.send_message("Sending anonymous message", ephemeral=True)
     channel = interaction.channel
     embed = discord.Embed(
@@ -134,15 +140,9 @@ async def admin_message(interaction: discord.Interaction, message: str):
     )
     await channel.send(embed=embed)
 
-
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="faq_add", description="Add a new FAQ response to the bot (admins only)")
 async def faq_add(interaction: discord.Interaction, answer: str, question_1: str, question_2: str = None, question_3: str = None):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
     questions = [q for q in [question_1, question_2, question_3] if q and q.strip()]
 
     # generate a unique ID for the new FAQ
@@ -167,15 +167,9 @@ async def faq_add(interaction: discord.Interaction, answer: str, question_1: str
     )
     await interaction.response.send_message("New FAQ response added successfully!", embed=embed) # let the user know that the new FAQ response was added
 
-
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="faq_remove", description="Remove an existing FAQ response from the bot (admins only)")
 async def faq_remove(interaction: discord.Interaction, faq_id: int):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
     faq_response = next((faq for faq in responses["faqs"] if faq["id"] == faq_id), None)
 
     if faq_response:
@@ -193,15 +187,9 @@ async def faq_remove(interaction: discord.Interaction, faq_id: int):
     else:
         await interaction.response.send_message("FAQ response not found! Use /faq_list to see all available responses and their IDs.", ephemeral=True) # let the user know that the FAQ response was not found
 
-
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="faq_list", description="List all available FAQ responses")
 async def faq_list(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
     reload_faqs()
     if not responses["faqs"]:
         await interaction.response.send_message(
@@ -237,16 +225,11 @@ async def faq_list(interaction: discord.Interaction):
         return embed, total_pages
 
     await Pagination(interaction, get_page).navigate()
-    
+
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="faq_set_threshold", description="Edit or show the FAQ activation threshold")
 async def faq_set_threshold(interaction: discord.Interaction, new_threshold: float = None):
     global faq_threshold
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
     if new_threshold is not None:
         if 0 <= new_threshold <= 1:
             faq_threshold = new_threshold
@@ -261,15 +244,9 @@ async def faq_set_threshold(interaction: discord.Interaction, new_threshold: flo
     else:
         await interaction.response.send_message(f"Current FAQ threshold: {faq_threshold}", ephemeral=True)
         
-
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="faq_test", description="Test the FAQ response for a question without sending it publicly")
 async def faq_test(interaction: discord.Interaction, question: str):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
     global faq_threshold
 
     best_faq = None
@@ -299,15 +276,9 @@ async def faq_test(interaction: discord.Interaction, question: str):
     else:
         await interaction.response.send_message(f"No suitable FAQ found for '{question}'.\nClosest was '{best_faq['questions'][0]}' with a score of {best_score:.2f}", ephemeral=True)
 
-
+@app_commands.default_permissions(kick_members=True)
 @tree.command(name="faq_stats", description="See the stats about your FAQ bot")
 async def faq_stats(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
 
     total_faqs_triggered = sum(faq["times_triggered"] for faq in responses["faqs"])
 
@@ -338,14 +309,9 @@ async def faq_stats(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
 
 # just learned about context menus so adding that for a manual FAQ trigger
+@app_commands.default_permissions(kick_members=True)
 @tree.context_menu(name="Manual FAQ")
 async def manual_faq(interaction: discord.Interaction, message: discord.Message):
-    if not interaction.user.guild_permissions.kick_members:
-        await interaction.response.send_message(
-            "Hey you can't do that!",
-            ephemeral=True
-        )
-        return
     
     # create the "view " (dropdown menu)
     faq_dropdown = SelectMenu(responses["faqs"], original_message=message)
